@@ -44,3 +44,60 @@ ubX2=math.ceil(max(X_training[:,1]))+1
 #label indexes
 idxPlus=y_training[y_training==0].index
 idxMin=y_training[y_training==1].index
+
+#plotting data classes
+plt.scatter(X_training[idxPlus,0],X_training[idxPlus,1],c='b',s=50)
+plt.scatter(X_training[idxMin,0],X_training[idxMin,1],c='r',s=50)
+plt.legend(target_names,loc=2)
+
+#meshgrid
+X,Y = np.mgrid[lbX1:ubX1:100j,lbX2:ubX2:100j]
+Z = classifier.decision_function(np.c_[X.ravel(),Y.ravel()]) 
+Z = Z.reshape(X.shape)
+plt.contourf(X,Y,Z > 0,alpha=0.4) #Contour
+plt.contour(X,Y,Z,colors=['k'], linestyles=['-'],levels=[0])
+plt.xlabel("Age")
+plt.ylabel("EstimatedSalary")
+plt.title('Linear Kernel')
+
+
+# model training - Kernel RBF
+classifier = SVC(kernel = 'rbf', random_state = 0)
+classifier.fit(X_train, y_train)
+
+# Predicting the Test set results
+y_pred = classifier.predict(X_test)
+
+# Making the Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+
+#target values
+y_training = pd.Series(y_train)
+X_training = X_train
+target_names=['0','1']
+
+# visualization limitslbX1=math.floor(min(X_training[:,0]))-1
+ubX1=math.ceil(max(X_training[:,0]))+1
+lbX2=math.floor(min(X_training[:,1]))-1
+ubX2=math.ceil(max(X_training[:,1]))+1
+[lbX1,ubX1,lbX2,ubX2]
+
+# label indexes
+idxPlus=y_training[y_training==0].index
+idxMin=y_training[y_training==1].index
+
+# class values with different colors
+plt.scatter(X_training[idxPlus,0],X_training[idxPlus,1],c='b',s=50)
+plt.scatter(X_training[idxMin,0],X_training[idxMin,1],c='r',s=50)
+plt.legend(target_names,loc=2)
+
+
+X,Y = np.mgrid[lbX1:ubX1:100j,lbX2:ubX2:100j]
+Z = classifier.decision_function(np.c_[X.ravel(),Y.ravel()])
+Z = Z.reshape(X.shape)
+plt.contourf(X,Y,Z > 0,alpha=0.4)
+plt.contour(X,Y,Z,colors=['k'], linestyles=['-'],levels=[0])
+
+plt.xlabel("Age")
+plt.ylabel("EstimatedSalary")
+plt.title('RBF Kernel')
