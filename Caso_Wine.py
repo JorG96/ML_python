@@ -20,6 +20,7 @@ print(df.columns)
 # Identificacion de variables
 df.info()
 df.describe()
+Y_test=[df["Customer_Segment"]]
 df = df.drop(["Customer_Segment"], axis=1) #eliminamos la variable independiente
 # Graficos de densidad
 fig, ax = plt.subplots(5,3, figsize=(14,12))
@@ -85,14 +86,14 @@ epsilon = 0.05
 wcss, k = elbow_method(epsilon, figure=True)
 
 # K-means
-kmeans = KMeans(n_clusters = k, init= 'k-means++', max_iter = 300, n_init =10, random_state = 0)
+kmeans = KMeans(n_clusters = 3, init= 'k-means++', max_iter = 300, n_init =10, random_state = 0)
 y_kmeans = kmeans.fit_predict(X)
 
 ### Plot clusters 
 plt.scatter(X[y_kmeans == 0, 0], X[y_kmeans == 0, 1], s = 100, c = 'blue',label = 'C1')
 plt.scatter(X[y_kmeans == 1, 0], X[y_kmeans == 1, 1], s = 100, c = 'red',label = 'C2')
 plt.scatter(X[y_kmeans == 2, 0], X[y_kmeans == 2, 1], s = 100, c = 'green',label = 'C3')
-plt.scatter(X[y_kmeans == 3, 0], X[y_kmeans == 3, 1], s = 100, c = 'cyan',label = 'C4')
+# plt.scatter(X[y_kmeans == 3, 0], X[y_kmeans == 3, 1], s = 100, c = 'cyan',label = 'C4')
 
 plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:,1], s = 300, c = 'yellow', label = 'Centroids')
 plt.title('WinesClusters')
@@ -101,9 +102,61 @@ plt.ylabel('X2: Malic_Acid')
 plt.legend()
 plt.show()
 
+Y_test=[i-1 for i in list(Y_test)]
+plt.scatter(new_df[new_df['Alcohol']]], 0], X[y_kmeans == 0, 1], s = 100, c = 'blue',label = 'C1')
+plt.scatter(X[y_kmeans == 1, 0], X[y_kmeans == 1, 1], s = 100, c = 'red',label = 'C2')
+plt.scatter(X[y_kmeans == 2, 0], X[y_kmeans == 2, 1], s = 100, c = 'green',label = 'C3')
+
 # 3. MODELO PREDICTIVO
-
+df2 = pd.read_csv("Caso_Wine.csv")
+df2 = df2.drop(["Customer_Segment"], axis=1)
 # PCA
+X = df2.iloc[:, 0:len(df2.columns)-1].values
+y = df2.iloc[:, len(df2.columns)-1].values
 
+# Train/Test Split
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25,random_state = 0)
 
+# Feature Scaling
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
 
+### PCA
+from sklearn.decomposition import PCA
+pca = PCA(n_components = None) 
+
+X_train_pca = pca.fit_transform(X_train)
+X_test_pca = pca.transform(X_test)
+
+explained_variance = pca.explained_variance_ratio_
+print("Varianza Explicada por cada PC")
+print(explained_variance)
+var_exp = np.round(np.sum(explained_variance[0:5]),4)
+print("Con 5 PC se explicaría el {var}% de la varianza".format(var=var_exp*100))
+
+# Se entrena solo para esas 5 componentes principales
+pca = PCA(n_components = 5)
+X_train_pca = pca.fit_transform(X_train)
+X_test_pca = pca.transform(X_test)
+explained_variance = pca.explained_variance_ratio_
+print("Varianza Explicada por cada PC")
+print(explained_variance)
+print("Parámetros del Modelo")
+print(pca.components_)
+# Visualizacion de las PC
+sns.barplot(x='PC',y="var",
+     data=pd.DataFrame({'var':explained_variance, 'PC':['PC1','PC2','PC3','PC4', 'PC5']}), color="c")
+### Modelo de Regresión
+# Regresion Lineal
+import statsmodels.api as sm
+model = sm.OLS(y_train, X_train_pca).fit()
+model.summary() 
+# RF
+from sklearn.ensemble import RandomForestRegressor
+model = RandomForestRegressor(max_depth=5, random_state=0, n_estimators=100)
+model.fit(X_train_pca, y_train)
+print("Relevancia de los parámetros")
+print(model.feature_importances_) 
