@@ -20,8 +20,8 @@ print(df.columns)
 # Identificacion de variables
 df.info()
 df.describe()
-df = df.drop(["Customer_Segment"], axis=1)
-# Grafico de densidad
+df = df.drop(["Customer_Segment"], axis=1) #eliminamos la variable independiente
+# Graficos de densidad
 fig, ax = plt.subplots(5,3, figsize=(14,12))
 axes_ = [axes_row for axes in ax for axes_row in axes]
 for i,c in enumerate(df.columns):
@@ -57,7 +57,7 @@ def elbow_method(epsilon, figure=False):
     i = 1
     
     while diff > epsilon:
-        print("Iteration Nº Clusters: k: {k}".format(k=i))
+        print(" K: {k}".format(k=i))
         kmeans = KMeans(n_clusters = i, init = 'k-means++', max_iter = 300,n_init = 10, random_state = 0)
         kmeans.fit(X)
         
@@ -104,3 +104,6 @@ plt.show()
 # 3. MODELO PREDICTIVO
 
 # PCA
+
+
+
