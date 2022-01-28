@@ -102,10 +102,10 @@ plt.ylabel('X2: Malic_Acid')
 plt.legend()
 plt.show()
 
-Y_test=[i-1 for i in list(Y_test)]
-plt.scatter(new_df[new_df['Alcohol']]], 0], X[y_kmeans == 0, 1], s = 100, c = 'blue',label = 'C1')
-plt.scatter(X[y_kmeans == 1, 0], X[y_kmeans == 1, 1], s = 100, c = 'red',label = 'C2')
-plt.scatter(X[y_kmeans == 2, 0], X[y_kmeans == 2, 1], s = 100, c = 'green',label = 'C3')
+# Y_test=[i-1 for i in list(Y_test)]
+# plt.scatter(new_df[new_df['Alcohol']]], 0], X[y_kmeans == 0, 1], s = 100, c = 'blue',label = 'C1')
+# plt.scatter(X[y_kmeans == 1, 0], X[y_kmeans == 1, 1], s = 100, c = 'red',label = 'C2')
+# plt.scatter(X[y_kmeans == 2, 0], X[y_kmeans == 2, 1], s = 100, c = 'green',label = 'C3')
 
 # 3. MODELO PREDICTIVO
 df2 = pd.read_csv("Caso_Wine.csv")
@@ -160,3 +160,27 @@ model = RandomForestRegressor(max_depth=5, random_state=0, n_estimators=100)
 model.fit(X_train_pca, y_train)
 print("Relevancia de los parámetros")
 print(model.feature_importances_) 
+# Usando 2 PC para visualizar
+pca = PCA(n_components = 2)
+X_train_pca = pca.fit_transform(X_train)
+X_test_pca = pca.transform(X_test)
+explained_variance = pca.explained_variance_ratio_
+print("Varianza Explicada por cada PC")
+print(explained_variance)
+print("Parámetros del Modelo")
+print(pca.components_)
+
+from sklearn.metrics import mean_squared_error,r2_score
+
+model = RandomForestRegressor(max_depth=5, random_state=0,
+ n_estimators=100)
+model.fit(X_train_pca, y_train)
+y_pred = model.predict(X_test_pca)
+r2 = r2_score(y_test, y_pred)
+mae = mean_squared_error(y_test, y_pred)
+print("r2: ", r2, "mae: ", mae)
+plt.scatter(X_train_pca[:,0], X_train_pca[:,1])
+plt.ylabel("PC1")
+plt.xlabel("PC2")
+plt.title("Representación Gráfica de las PC")
+plt.show()
