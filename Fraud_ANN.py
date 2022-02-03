@@ -47,9 +47,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import math
 import tensorflow as tf
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense
-from tensorflow.keras.optimizers import SGD
+from tf.keras.models import Sequential
+from tf.keras.layers import Dense
+from tf.keras.optimizers import SGD
 
 """
  Funcion para crear una NN para clasificacion binaria usando 2 HL
@@ -78,7 +78,7 @@ def create_nn(n_features, w_in, w_h1, n_var_out, optimizer, lr, momentum,decay):
      # Loss Function -> Cross Entropy (Binary)
      # Optimizer -> sgd, adam...
      if optimizer == 'sgd':
-         keras.optimizers.SGD(lr=lr, momentum=momentum, decay=decay,nesterov=False)
+         tf.keras.optimizers.SGD(lr=lr, momentum=momentum, decay=decay,nesterov=False)
          model.compile(loss='binary_crossentropy', optimizer='sgd',metrics=['accuracy'])
      else:
          model.compile(loss='binary_crossentropy', optimizer='adam',metrics=['accuracy'])
@@ -102,4 +102,13 @@ decay)
 
 # Fitting the ANN to the Training set
 model.fit(X_train, y_train, batch_size = batch_size, nb_epoch = nb_epochs)
+
+
 # 3 ANN Predictions
+
+# Predict
+y_pred = model.predict(X_test)
+y_pred = np.round(y_pred)
+# Confusion Matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test, y_pred)
