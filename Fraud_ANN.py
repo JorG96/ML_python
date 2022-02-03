@@ -47,5 +47,59 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import math
 import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import SGD
 
+"""
+ Funcion para crear una NN para clasificacion binaria usando 2 HL
+
+"""
+def create_nn(n_features, w_in, w_h1, n_var_out, optimizer, lr, momentum,decay):
+
+     # Initialising the ANN
+     model = Sequential()
+     # First HL
+     # [batch_size x n_features] x [n_features x w_in]
+     model.add(Dense(units = w_in, input_dim = n_features,
+     kernel_initializer = 'normal',
+     activation = 'relu'))
+     # Second HL
+     # [batch_size x w_in] x [w_in x w_h1]
+     model.add(Dense(units = w_h1, input_dim = w_in,
+     kernel_initializer = 'normal',
+     activation = 'relu'))
+    
+     # Output Layer
+     
+     # [batch_size x w_h1] x [w_h1 x w_out]
+     model.add(Dense(units = n_var_out, kernel_initializer = 'normal',activation = 'sigmoid'))
+     # Compile Model
+     # Loss Function -> Cross Entropy (Binary)
+     # Optimizer -> sgd, adam...
+     if optimizer == 'sgd':
+         keras.optimizers.SGD(lr=lr, momentum=momentum, decay=decay,nesterov=False)
+         model.compile(loss='binary_crossentropy', optimizer='sgd',metrics=['accuracy'])
+     else:
+         model.compile(loss='binary_crossentropy', optimizer='adam',metrics=['accuracy'])
+    
+     return model
+ 
+# Parametros
+n_features = np.shape(X_train)[1]
+w_in = 12
+w_h1 = 8
+n_var_out = 1
+batch_size = 100
+nb_epochs = 100
+optimizer = 'adam'
+lr = 0.1
+momentum = 0.01
+decay = 0.0
+# Create NN
+model = create_nn(n_features, w_in, w_h1, n_var_out, optimizer, lr, momentum,
+decay)
+
+# Fitting the ANN to the Training set
+model.fit(X_train, y_train, batch_size = batch_size, nb_epoch = nb_epochs)
 # 3 ANN Predictions
