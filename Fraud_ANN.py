@@ -78,7 +78,7 @@ def create_nn(n_features, w_in, w_h1, n_var_out, optimizer, lr, momentum,decay):
      # Loss Function -> Cross Entropy (Binary)
      # Optimizer -> sgd, adam...
      if optimizer == 'sgd':
-         tf.keras.optimizers.SGD(lr=lr, momentum=momentum, decay=decay,nesterov=False)
+         SGD(lr=lr, momentum=momentum, decay=decay,nesterov=False)
          model.compile(loss='binary_crossentropy', optimizer='sgd',metrics=['accuracy'])
      else:
          model.compile(loss='binary_crossentropy', optimizer='adam',metrics=['accuracy'])
