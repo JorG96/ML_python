@@ -5,20 +5,12 @@ Created on Wed Feb  2 18:07:26 2022
 @author: ASUS
 """
 # Importing the Keras libraries and packages
-import os
-import numpy as np
-import tensorflow as tf
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 
 from tensorflow.keras.models import Sequential # Para inicializar la NN (como es una Secuencia de layers, lo hago igual que con ANN; no uso la inici. de Graph)
 from tensorflow.keras.layers import Convolution2D # Para hacer el paso de convolución, 1er step
 from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D # Para el Pooling step, paso 2
 from tensorflow.keras.layers import Flatten # Para el flattening, step 3
 from tensorflow.keras.layers import Dense # Para añadir los fully-connected layers hacia el layer de outputs
-from tensorflow.keras.layers import Activation, Dropout
-from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img, img_to_array
-from tensorflow.keras.layers import Dense, Dropout, Flatten
 from tensorflow.keras.datasets import mnist
 from tensorflow import keras
 from sklearn.metrics import f1_score, confusion_matrix, precision_recall_fscore_support
@@ -47,9 +39,6 @@ print(x_test.shape[0], 'test samples')
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
 
-# =============================================================================
-# Extracción de variables
-# =============================================================================
 # Inicialización de la CNN
 model = Sequential()
 
@@ -76,9 +65,7 @@ model.add(AveragePooling2D(pool_size=(2, 2),
 # Paso 5 - Flattening
 model.add(Flatten())
 
-# =============================================================================
-# Red NN para classificación Fully Connected
-# =============================================================================
+# RED NN FULLY CONNECTED 
 
 # Entrada: n_batch x 120
 # HL: 120 x 120
