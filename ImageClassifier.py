@@ -21,14 +21,44 @@ from tensorflow.keras.layers import Dense # Para añadir los fully-connected lay
 from sklearn.metrics import f1_score, confusion_matrix, precision_recall_fscore_support
 from tensorflow.keras.preprocessing.image import ImageDataGenerator,load_img, img_to_array
 
-def build_model(optimizer="adam",
- loss='binary_crossentropy',
- height=32,
- width=32,
- channels=1,
- output_classes=1,
- final_activation="sigmoid"):
+
+def image_data_generator(data_dir="",
+                         train_data=False,
+                         batch_size=10,
+                         target_size=(100, 100),
+                         color_mode='rgb',
+                         class_mode='binary',
+                         shuffle=True):
     
+    if train_data:
+        datagen = ImageDataGenerator(rescale=1./255,
+                                     # rotation_range=20,
+                                     # width_shift_range=0.2,
+                                     # height_shift_range=0.2,
+                                     # shear_range=0.2,
+                                     # zoom_range=0.2,
+                                     # horizontal_flip=True,
+                                     validation_split=0.2
+                                     )
+    else:
+        datagen = ImageDataGenerator(rescale=1./255)
+        
+    generator = datagen.flow_from_directory(data_dir,
+                                            target_size=target_size,
+                                            color_mode=color_mode,
+                                            batch_size=batch_size,
+                                            shuffle=shuffle,
+                                            class_mode=class_mode)
+    return generator
+
+def build_model(optimizer="adam",
+     loss='binary_crossentropy',
+     height=32,
+     width=32,
+     channels=1,
+     output_classes=1,
+     final_activation="sigmoid"):
+        
 # Inicialización de la CNN
     model=Sequential()
     
@@ -62,39 +92,44 @@ def build_model(optimizer="adam",
     model.compile(loss=loss,optimizer=optimizer, metrics=['accuracy'])
     
     
-    batch_size = 20
-    height, width = (32, 32)
-    epochs = 80
-    color_mode = "rgb"
-    optimizer = "adam"
-    loss = "binary_crossentropy"
-    class_mode='binary'
-    output_classes=1 # Number of output classes
-    final_activation="sigmoid"
+
     return model
-    
+
+batch_size = 20
+height, width = (32, 32)
+epochs = 80
+color_mode = "rgb"
+optimizer = "adam"
+loss = "binary_crossentropy"
+class_mode='binary'
+output_classes=1 # Number of output classes
+final_activation="sigmoid"
+channels=1
+
 training_set = image_data_generator('./Training/horse-or-human/train',
- train_data=True,
- batch_size=batch_size,
- target_size=(height, width),
- color_mode=color_mode,
- class_mode=class_mode,
- shuffle=True)
+                                    train_data=True,
+                                    batch_size=batch_size,
+                                    target_size=(height, width),
+                                    color_mode=color_mode,
+                                    class_mode=class_mode,
+                                    shuffle=True)
+
+
 val_set = image_data_generator('./Training/horse-or-human/validation',
- train_data=False,
- batch_size=batch_size,
- target_size=(height, width),
- color_mode=color_mode,
- class_mode=class_mode,
- shuffle=True)
+                     train_data=False,
+                     batch_size=batch_size,
+                     target_size=(height, width),
+                     color_mode=color_mode,
+                     class_mode=class_mode,
+                     shuffle=True)
 # Definición del modelo y visualización de la arquitectura definida.
 model = build_model(optimizer=optimizer,
- loss=loss,
- height=height,
- width=width,
- channels=channels,
- output_classes=output_classes,
- final_activation=final_activation)
+                loss=loss,
+                height=height,
+                width=width,
+                channels=channels,
+                output_classes=output_classes,
+                final_activation=final_activation)
 print(model.summary())
 # Hago el fit de los sets de datos al modelo y entrenamiento del mismo
 model.fit_generator(training_set,
