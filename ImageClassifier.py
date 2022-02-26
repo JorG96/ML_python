@@ -8,16 +8,13 @@ Created on Wed Feb 23 21:11:56 2022
 import os
 import numpy as np
 import tensorflow as tf
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-
 
 from tensorflow import keras
-from tensorflow.keras.models import Sequential # Para inicializar la NN (como es una Secuencia de layers, lo hago igual que con ANN; no uso la inici. de Graph)
-from tensorflow.keras.layers import Convolution2D # Para hacer el paso de convolución, 1er step
-from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D # Para el Pooling step, paso 2
-from tensorflow.keras.layers import Flatten # Para el flattening, step 3
-from tensorflow.keras.layers import Dense # Para añadir los fully-connected layers hacia el layer de outputs
+from tensorflow.keras.models import Sequential 
+from tensorflow.keras.layers import Convolution2D 
+from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D 
+from tensorflow.keras.layers import Flatten 
+from tensorflow.keras.layers import Dense 
 from sklearn.metrics import f1_score, confusion_matrix, precision_recall_fscore_support
 from tensorflow.keras.preprocessing.image import ImageDataGenerator,load_img, img_to_array
 
@@ -32,12 +29,12 @@ def image_data_generator(data_dir="",
     
     if train_data:
         datagen = ImageDataGenerator(rescale=1./255,
-                                     # rotation_range=20,
-                                     # width_shift_range=0.2,
-                                     # height_shift_range=0.2,
-                                     # shear_range=0.2,
-                                     # zoom_range=0.2,
-                                     # horizontal_flip=True,
+                                      rotation_range=20,
+                                      width_shift_range=0.2,
+                                      height_shift_range=0.2,
+                                      shear_range=0.2,
+                                      zoom_range=0.2,
+                                      horizontal_flip=True,
                                      validation_split=0.2
                                      )
     else:
@@ -91,20 +88,24 @@ def build_model(optimizer="adam",
     model.add(Dense(units = output_classes, activation = final_activation))
     model.compile(loss=loss,optimizer=optimizer, metrics=['accuracy'])
     
-    
-
     return model
 
 batch_size = 20
 height, width = (32, 32)
-epochs = 80
+epochs = 10
 color_mode = "rgb"
 optimizer = "adam"
 loss = "binary_crossentropy"
 class_mode='binary'
 output_classes=1 # Number of output classes
 final_activation="sigmoid"
-channels=1
+# Canales según el tipo de color_mode
+if color_mode == "grayscale":
+    channels = 1
+    grayscale = True
+else:
+    channels = 3
+    grayscale = False
 
 training_set = image_data_generator('./Training/horse-or-human/train',
                                     train_data=True,
@@ -122,7 +123,7 @@ val_set = image_data_generator('./Training/horse-or-human/validation',
                      color_mode=color_mode,
                      class_mode=class_mode,
                      shuffle=True)
-# Definición del modelo y visualización de la arquitectura definida.
+# Entrenamiento del modelo
 model = build_model(optimizer=optimizer,
                 loss=loss,
                 height=height,
@@ -131,9 +132,47 @@ model = build_model(optimizer=optimizer,
                 output_classes=output_classes,
                 final_activation=final_activation)
 print(model.summary())
-# Hago el fit de los sets de datos al modelo y entrenamiento del mismo
 model.fit_generator(training_set,
  steps_per_epoch=batch_size,
  epochs=epochs,validation_data=val_set)
 # Guardamos el modelo en un archivo binario
 model.save('model_horses_vs_humans.h5')
+
+# Model Evaluation
+
+# Loss/Accuracy
+score = model.evaluate(test_set, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
+
+# Load test set and turn it into matrices arrays
+path = 'datasets/horses-or-humans-dataset/horse-or-human/test/'
+entries = os.listdir(path)
+
+X_test = []
+y_test = []
+for entry in entries:
+    subpath = path + entry
+    files = []
+    for _, _, f in os.walk(subpath):
+        files += f
+
+    X_test += [np.expand_dims(img_to_array(load_img(subpath + '/' + f,
+                                                    target_size = (height, width),
+                                                    grayscale=grayscale)), axis = 0) for f in files]
+   
+    if entry == "horses":
+        y_test += [0]*len(f)
+    else:
+        y_test += [1]*len(f)
+
+# Obtain predictions for all test set
+y_pred = [model.predict_classes(x)[0][0] for x in X_test]
+
+# Evaluate results
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix: ")
+print(cm)
+print("Precision: ", np.round(precision_score(y_test, y_pred),4))
+print("Recall: ", np.round(recall_score(y_test, y_pred),4))
+print("f1_score: ", np.round(f1_score(y_test, y_pred),4))
