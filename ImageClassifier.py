@@ -17,6 +17,7 @@ from tensorflow.keras.layers import Flatten
 from tensorflow.keras.layers import Dense 
 from sklearn.metrics import f1_score, confusion_matrix, precision_recall_fscore_support
 from tensorflow.keras.preprocessing.image import ImageDataGenerator,load_img, img_to_array
+from sklearn.metrics import f1_score, confusion_matrix, precision_score, recall_score, auc, log_loss
 
 
 def image_data_generator(data_dir="",
@@ -94,7 +95,7 @@ batch_size = 20
 height, width = (32, 32)
 epochs = 10
 color_mode = "rgb"
-optimizer = "adam"
+optimizer = "sgd"
 loss = "binary_crossentropy"
 class_mode='binary'
 output_classes=1 # Number of output classes
@@ -123,6 +124,15 @@ val_set = image_data_generator('./Training/horse-or-human/validation',
                      color_mode=color_mode,
                      class_mode=class_mode,
                      shuffle=True)
+
+test_set = image_data_generator('./Training/horse-or-human/test',
+                     train_data=False,
+                     batch_size=batch_size,
+                     target_size=(height, width),
+                     color_mode=color_mode,
+                     class_mode=class_mode,
+                     shuffle=True)
+
 # Entrenamiento del modelo
 model = build_model(optimizer=optimizer,
                 loss=loss,
@@ -146,13 +156,13 @@ print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
 # Load test set and turn it into matrices arrays
-path = 'datasets/horses-or-humans-dataset/horse-or-human/test/'
+path = './Training/horse-or-human/test'
 entries = os.listdir(path)
 
 X_test = []
 y_test = []
 for entry in entries:
-    subpath = path + entry
+    subpath = path +'/'+ entry
     files = []
     for _, _, f in os.walk(subpath):
         files += f
@@ -162,9 +172,9 @@ for entry in entries:
                                                     grayscale=grayscale)), axis = 0) for f in files]
    
     if entry == "horses":
-        y_test += [0]*len(f)
+        y_test += [0]*len(files)
     else:
-        y_test += [1]*len(f)
+        y_test += [1]*len(files)
 
 # Obtain predictions for all test set
 y_pred = [model.predict_classes(x)[0][0] for x in X_test]
