@@ -94,10 +94,9 @@ class RBM():
         return v
 
 # Load data
-path_relative = "datasets"
-df_books = pd.read_csv(path_relative + '/goodbooks-10k/books.csv')
+df_books = pd.read_csv('./Training/books.csv')
 df_books = df_books[df_books['id']<=1000]
-df_ratings = pd.read_csv(path_relative + '/goodbooks-10k/ratings.csv')
+df_ratings = pd.read_csv('./Training/ratings.csv')
 df_ratings = df_ratings[df_ratings['book_id'].isin(df_books['id'])][['user_id', 'book_id', 'rating']]
 print(df_ratings.head())
 
@@ -174,5 +173,4 @@ for i in range(len(test_set)):
     id_books = ([v_pred==1][0][0]) & ([v_test==-1][0][0])
     id_books = id_books.tolist()
     
-
 print("Median of recommended books: ", np.median(list_recom_books))

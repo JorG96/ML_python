@@ -91,11 +91,11 @@ def build_model(optimizer="adam",
     
     return model
 
-batch_size = 20
+batch_size = 10
 height, width = (32, 32)
-epochs = 10
-color_mode = "rgb"
-optimizer = "sgd"
+epochs = 20
+color_mode = "grayscale"
+optimizer = "rmsprop"
 loss = "binary_crossentropy"
 class_mode='binary'
 output_classes=1 # Number of output classes
