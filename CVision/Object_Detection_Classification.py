@@ -4,14 +4,14 @@ Created on Mon Apr 11 10:34:39 2022
 
 @author: Jorge.Camacho1
 """
-
+#libraries
 import numpy as np
 import argparse
 import time
 import cv2
 import os
 
-
+#parse arguments
 ap=argparse.ArgumentParser()
 ap.add_argument("-i", "--image",required=True,help="path to input image")
 ap.add_argument("-y", "--yolo",required=True,help="base path to YOLO directory")
@@ -19,6 +19,7 @@ ap.add_argument("-c", "--confidence",type=float,default=0.5,help="minimum probab
 ap.add_argument("-t", "--threshold",type=float,default=0.3,help="threshold when apllying non-maxima suppression")
 args= vars(ap.parse_args())
 
+#load COCO class labels
 labelsPath=os.path.sep.join([args["yolo"],"coco.names"])
 LABELS=open(labelsPath).read().strip().split("\n")
 
@@ -31,6 +32,8 @@ configPath = os.path.sep.join([args["yolo"], "yolov3.cfg"])
 # load our YOLO object detector trained on COCO dataset (80 classes)
 print("[INFO] loading YOLO from disk...")
 net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
+
+
 # load our input image and grab its spatial dimensions
 image = cv2.imread(args["image"])
 (H, W) = image.shape[:2]
