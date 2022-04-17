@@ -40,10 +40,9 @@ configPath = os.path.sep.join([args["yolo"], "yolov3.cfg"])
 print("[INFO] loading YOLO from disk...")
 net = cv2.dnn.readNetFromDarknet(configPath, weightsPath)
 ln = net.getLayerNames()
-ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+ln = [ln[i - 1] for i in net.getUnconnectedOutLayers()]
 
-# initialize the video stream, pointer to output video file, and
-# frame dimensions
+# initialize the video stream, pointer to output video file, and frame dimensions
 vs = cv2.VideoCapture(args["input"])
 writer = None
 (W, H) = (None, None)
@@ -55,12 +54,11 @@ try:
     total = int(vs.get(prop))
     print("[INFO] {} total frames in video".format(total))
  
-# an error occurred while trying to determine the total
-# number of frames in the video file
 except:
     print("[INFO] could not determine # of frames in video")
     print("[INFO] no approx. completion time can be provided")
     total = -1
+    
 # loop over frames from the video file stream
 while True:
     # read the next frame from the file
@@ -141,6 +139,7 @@ while True:
                 confidences[i])
             cv2.putText(frame, text, (x, y - 5),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            
     # check if the video writer is None
     if writer is None:
         # initialize our video writer
